@@ -1,0 +1,21 @@
+Question: has whiskers
+Question: bigger than person
+Question: roars
+Answer: Lion
+Answer: Tiger
+Question: Barks
+Answer: Dog
+Question: eats cheese
+Answer: mouse
+Answer: Cat
+Question: has legs
+Question: has trunk
+Answer: Elephant
+Question: is tall
+Answer: Giraffe
+Question: moooos
+Answer: Cow
+Answer: Rhino
+Question: Slimey
+Answer: Slug
+Answer: Snake
