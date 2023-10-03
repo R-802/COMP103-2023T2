@@ -11,12 +11,11 @@
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import ecs100.*;
 
 public class Town {
 
-    private String name;
-    private Set<Town> neighbours = new HashSet<Town>();
+    private final String name;
+    private final Set<Town> neighbours = new HashSet<Town>();
 
     public Town(String name) {
         this.name = name;
@@ -34,8 +33,7 @@ public class Town {
         neighbours.add(node);
     }
 
-    public String toString(){
-        return name+" ("+neighbours.size()+" connections)";
+    public String toString() {
+        return name + " (" + neighbours.size() + " connections)";
     }
-
 }
