@@ -202,6 +202,7 @@ public class BusNetworks {
     //======================//
     //      Challenge       //
     //======================//
+
     /**
      * Displays the graph of towns and their connections, based on data read from data-with-lat-long.txt
      * Towns are displayed as circles and connections as lines between them.
