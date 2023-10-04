@@ -15,10 +15,17 @@ import java.util.Set;
 public class Town {
 
     private final String name;
-    private final Set<Town> neighbours = new HashSet<Town>();
+    private final Set<Town> neighbours = new HashSet<>();
+    public double x, y;
 
     public Town(String name) {
         this.name = name;
+    }
+
+    public Town(String name, double x, double y) {
+        this.name = name;
+        this.x = x;
+        this.y = y;
     }
 
     public String getName() {

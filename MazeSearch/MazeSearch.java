@@ -125,7 +125,7 @@ public class MazeSearch {
 
     /**
      * Finds the shortest path from start cell to the goal.
-     * Uses BFS (breadth first search) to traverse the graph and draw path.
+     * Uses BFS (breadth first search) to traverse the graph and find the shortest path.
      *
      * @param start The starting node
      */
