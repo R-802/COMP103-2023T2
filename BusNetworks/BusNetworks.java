@@ -3,9 +3,9 @@
 // You may not distribute it in any other way without permission.
 
 /* Code for COMP103 - 2023T2, Assignment 6
- * Name:
- * Username:
- * ID:
+ * Name: Shemaiah Rangitaawa
+ * Username: rangitshem
+ * ID: 300601546
  */
 
 import ecs100.UI;
@@ -97,7 +97,9 @@ public class BusNetworks {
                 Set<Town> neighbors = busNetwork.get(town).getNeighbours();
 
                 // Print each town and its set of neighbors with no brackets
-                UI.println(townName + " -> " + neighbors.toString().replace("[", "").replace("]", ""));
+                String removeSB = neighbors.toString().replace("[", "").replace("]", "");
+                String removeConnection = removeSB.replace("( 1  connections)", "").replace("( 2  connections)", "").replace("( 3  connections)", "");
+                UI.println(townName + " -> " + removeConnection);
             }
         }
     }

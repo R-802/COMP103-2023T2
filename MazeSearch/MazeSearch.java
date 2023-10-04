@@ -3,9 +3,9 @@
 // You may not distribute it in any other way without permission.
 
 /* Code for COMP103 - 2023T2, Assignment 6
- * Name:
- * Username:
- * ID:
+ * Name: Shemaiah Rangitaawa
+ * Username: rangitshem
+ * ID: 300601546
  */
 
 import ecs100.UI;
@@ -13,7 +13,6 @@ import ecs100.UI;
 import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Queue;
 
 
@@ -131,9 +130,11 @@ public class MazeSearch {
      * @param start The starting node
      */
     public void exploreFromCellShortest(MazeCell start) {
-        if (stopNow) return; /// Exit if user clicked the stop now button
+        if (stopNow) return; // Exit if user clicked the stop now button
         Queue<ArrayList<MazeCell>> queue = new ArrayDeque<>(); // Queue for BFS
-        queue.offer(new ArrayList<>(Collections.singleton(start))); // Add start cell to queue
+        ArrayList<MazeCell> startCell = new ArrayList<>();
+        startCell.add(start);
+        queue.offer(startCell); // Add start cell to queue
         while (!queue.isEmpty()) {
             ArrayList<MazeCell> cells = queue.poll();
             MazeCell currentCell = cells.get(cells.size() - 1); // Get the unvisited cell
@@ -172,7 +173,7 @@ public class MazeSearch {
         UI.addButton("Stop", () -> stopNow = true);
         UI.addSlider("Speed", 1, 101, 80, (double v) -> delay = (int) (100 - v));
         UI.addButton("Quit", UI::quit);
-        UI.setDivider(0.);
+        UI.setDivider(0);
     }
 
     /**
