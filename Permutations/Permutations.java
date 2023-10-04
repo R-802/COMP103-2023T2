@@ -67,6 +67,7 @@ public class Permutations {
         if (remainingItems.isEmpty()) { // Base case
             if (allPermutations.size() <= 10000) // Only add the first 10000 permutations to the allPermutations list
             {
+                List<String> permutationCopy = new ArrayList<>();
                 allPermutations.add(permutationCopy); // Add a copy of the permutation to allPermutations
             }
             counter++;

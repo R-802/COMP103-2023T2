@@ -13,7 +13,9 @@ import ecs100.UI;
 import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Queue;
+
 
 /**
  * Search for a path to the goal in a maze.
@@ -33,7 +35,6 @@ import java.util.Queue;
  */
 
 public class MazeSearch {
-
     private Maze maze;
     private String search = "first";   // "first", "all", or "shortest"
     private int pathCount = 0;
@@ -69,6 +70,7 @@ public class MazeSearch {
      */
     public boolean exploreFromCell(MazeCell cell) {
         if (cell == maze.getGoal()) { // We've found the path
+            UI.printMessage("Found!");
             cell.draw(Color.blue);   // Indicate finding the goal
             return true; // Terminate method
         } else {
@@ -123,35 +125,34 @@ public class MazeSearch {
     }
 
     /**
-     * CHALLENGE
-     * Search for shortest path from a cell,
-     * Use Breadth first search.
+     * Finds the shortest path from start cell to the goal.
+     * Uses BFS (breadth first search) to traverse the graph and draw path.
+     *
+     * @param start The starting node
      */
     public void exploreFromCellShortest(MazeCell start) {
-        boolean found = false;
-        Queue<ArrayList<MazeCell>> paths = new ArrayDeque<>();
-        ArrayList<MazeCell> routes = new ArrayList<>();
-        routes.add(start);
-        paths.offer(routes);
-        while (!found || paths.isEmpty()) {
-            ArrayList<MazeCell> route = paths.poll();
-            if (route == null) return;
-            MazeCell cell = route.get(route.size() - 1);
-            if (cell.equals(maze.getGoal())) {
-                found = true;
-                for (MazeCell step : route) {
-                    step.draw(Color.yellow);
+        if (stopNow) return; /// Exit if user clicked the stop now button
+        Queue<ArrayList<MazeCell>> queue = new ArrayDeque<>(); // Queue for BFS
+        queue.offer(new ArrayList<>(Collections.singleton(start))); // Add start cell to queue
+        while (!queue.isEmpty()) {
+            ArrayList<MazeCell> cells = queue.poll();
+            MazeCell currentCell = cells.get(cells.size() - 1); // Get the unvisited cell
+            if (currentCell == maze.getGoal()) { // When the current cell is at the goal
+                for (MazeCell cellStep : cells) { // Draw the path it has taken
+                    cellStep.draw(Color.yellow);
+                    UI.sleep(delay);
                 }
-                cell.draw(Color.red);
-                UI.sleep(delay);
-                cell.draw(Color.green);
-            } else {
-                cell.visit();
-                for (MazeCell neighbors : cell) {
+                UI.printMessage("Found Shortest Path!");
+                currentCell.draw(Color.blue); // Color the goal blue
+                return; // Terminate the method
+            } else { // If not at the goal
+                UI.printMessage("Searching...");
+                currentCell.visit(); // Mark cell as visited
+                for (MazeCell neighbors : currentCell) { // Iterate through its neighbors
                     if (!neighbors.isVisited()) {
-                        ArrayList<MazeCell> temp = new ArrayList<>(route);
-                        temp.add(neighbors);
-                        paths.offer(temp);
+                        ArrayList<MazeCell> cellsCopy = new ArrayList<>(cells);
+                        cellsCopy.add(neighbors); // Add neighbors to a temporary array
+                        queue.offer(cellsCopy); // Add copy of cells with neighbors to the queue
                     }
                 }
             }
