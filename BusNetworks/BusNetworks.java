@@ -23,7 +23,7 @@ public class BusNetworks {
      * Map of towns, indexed by their names
      */
     private final Map<String, Town> busNetwork = new HashMap<>();
-    private final int circleSize = 11;
+    private final int circleSize = 12;
 
     public static void main(String[] arguments) {
         BusNetworks bnw = new BusNetworks();
@@ -31,11 +31,20 @@ public class BusNetworks {
     }
 
     /**
-     * Core: Load a network of towns from a file.
-     * Constructs a Set of Town objects in the busNetwork field.
-     * Each town has a name and a set of neighbouring towns
-     * first line of file contains the names of all the towns.
-     * Remaining lines have pairs of names of towns that are connected.
+     * Core: Loads a network of towns from a specified file and constructs a set of {@code Town} objects
+     * in the {@code busNetwork} field.
+     * <p>
+     * The method expects a file where:
+     * <ul>
+     *     <li>The first line contains the names of all the towns, separated by whitespace.</li>
+     *     <li>Each subsequent line contains pairs of town names that are connected, separated by whitespace.</li>
+     * </ul>
+     * The {@code busNetwork} is populated with {@code Town} objects, each having a name and a set
+     * of neighbouring towns based on the file content. The UI text is cleared at the start of the
+     * method, and a message is printed to the UI upon successful loading of the towns.
+     *
+     * @param filename the name of the file containing the town network data
+     * @throws RuntimeException if loading the file fails, with the cause being the original {@code IOException}
      */
     public void loadNetwork(String filename) {
         try {
@@ -69,10 +78,24 @@ public class BusNetworks {
         }
     }
 
+
     /**
-     * Core: Print all the towns and their neighbours.
-     * Each line starts with the name of the town, followed by
-     * the names of all its immediate neighbours.
+     * Core: Prints the names of all towns in the network along with their immediate neighbours to the UI.
+     * <p>
+     * The method iterates through each {@code Town} object in the {@code busNetwork} and prints
+     * a line to the UI for each town. Each line starts with the name of the town, followed by
+     * an arrow (" -> ") and the names of all its immediate neighbours, separated by commas.
+     * The text is cleared at the start of the method, and a header line is printed before
+     * the town information to provide context to the user.
+     * <p>
+     * Example Output:
+     * <pre>
+     * The current network:
+     * ====================
+     * TownA -> TownB, TownC
+     * TownB -> TownA, TownD
+     * TownC -> TownA
+     * TownD -> TownB
      */
     public void printNetwork() {
         UI.clearText();
@@ -84,7 +107,7 @@ public class BusNetworks {
             if (town != null) {
                 // Get name of the town and its set of neighbors
                 String townName = town.getName();
-                String neighborNames = getTownName(town);
+                String neighborNames = getTownName(town.getNeighbours());
 
                 // Print each town and its set of neighbors
                 UI.println(townName + " -> " + neighborNames);
@@ -97,12 +120,9 @@ public class BusNetworks {
      * printNetwork to clean up the output of the string. I didn't want to modify the to string
      * method of the Town class.
      *
-     * @param town The town for which to retrieve neighbor names.
      * @return A string containing all neighbor names of the given town, separated by commas.
      */
-    private String getTownName(Town town) {
-        // Retrieve the set of neighboring towns.
-        Set<Town> neighbors = town.getNeighbours();
+    private String getTownName(Set<Town> neighbors) {
         StringBuilder neighborNamesBuilder = new StringBuilder();
 
         // Iterate through each neighbor in the set.
@@ -211,16 +231,16 @@ public class BusNetworks {
      * Displays the graph of towns and their connections, based on data read from data-with-lat-long.txt
      * Towns are displayed as circles and connections as lines between them.
      */
-    public void displayGraph() {
+    public void loadChallenge() {
         try {
             UI.clearPanes();
             busNetwork.clear();
 
-            double latitudeOffset = 35, longitudeOffset = -165;
-            int magnification = 55;
-
             List<String> lines = Files.readAllLines(Path.of("BusNetworks\\data-with-lat-long.txt"));
             int numberOfTowns = Integer.parseInt(lines.remove(0).trim()); // Retrieve and remove number of towns
+
+            double latitudeOffset = 35, longitudeOffset = -165;
+            int magnification = 55;
 
             for (int i = 0; i < numberOfTowns; i++) {
                 String[] townData = lines.remove(0).split(" ");
@@ -244,12 +264,7 @@ public class BusNetworks {
                     secondTown.addNeighbour(firstTown);
                 }
             }
-
-            // Drawing network
-            for (Town town : busNetwork.values()) {
-                drawVertex(town.getX(), town.getY(), town.getName(), false);
-            }
-
+            displayVertices();
             UI.println("Loaded " + numberOfTowns + " towns!");
             UI.drawString("Click to draw connected towns", 2, 12);
             UI.setMouseListener(this::doMouse);
@@ -258,34 +273,65 @@ public class BusNetworks {
         }
     }
 
+    /**
+     * Displays all vertices (towns) on the UI by drawing them on the graphics window.
+     * <p>
+     * This method iterates through all the {@code Town} objects in the {@code busNetwork}
+     * and utilizes the {@code drawVertex} method to draw each vertex on the UI. The
+     * vertices are drawn at their respective (x, y) coordinates and display the town's
+     * name. The graphics window and text are cleared at the start to ensure a clean slate
+     * for drawing.
+     */
+    private void displayVertices() {
+        UI.clearGraphics();
+        UI.clearText();
+        for (Town town : busNetwork.values()) {
+            drawVertex(town.getX(), town.getY(), town.getName(), false);
+        }
+    }
+
     private void doMouse(String action, double x, double y) {
         if (action.equals("released")) {
             Town clickedTown = getTownByCoordinates(x, y);
             if (clickedTown != null) {
-                displayGraph();
-                UI.setColor(Color.green);
-                drawVertex(clickedTown.getX(), clickedTown.getY(), clickedTown.getName(), true);
+                displayVertices();
+
+                // Draw the towns neighbors with its connections and black filled circles
                 for (Town neighbour : clickedTown.getNeighbours()) {
-                    UI.setColor(Color.black);
                     drawLine(clickedTown.getX(), clickedTown.getY(), neighbour.getX(), neighbour.getY(), 0);
                     drawVertex(neighbour.getX(), neighbour.getY(), neighbour.getName(), true);
                 }
+
+                // Color the clicked town green
+                UI.setColor(Color.green);
+                drawVertex(clickedTown.getX(), clickedTown.getY(), clickedTown.getName(), true);
+                UI.setColor(Color.black);
+
+                // Get name of the town and its set of neighbors
+                String townName = (clickedTown.getName());
+                String neighborNames = getTownName(clickedTown.getNeighbours());
+
+                // Print each town and its set of neighbors
+                UI.println("Connections:" + "\n============");
+                UI.println(townName + " -> " + neighborNames);
             }
         }
     }
 
-    private Town getTownByCoordinates(double x, double y) {
-        for (Town town : busNetwork.values()) {
-            double distance = calculateDistance(x, y, town.getX(), town.getY());
-            if (distance <= (double) circleSize) return town;
-        }
-        return null; // Return null if no town is found within the threshold distance
-    }
-
-    private double calculateDistance(double x1, double y1, double x2, double y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
-
+    /**
+     * Draws a vertex at the specified (x, y) coordinates and displays the provided text.
+     * <p>
+     * The method draws a circle (vertex) at the specified coordinates and displays
+     * the provided text centered within the circle. The vertex can be optionally
+     * highlighted by filling the circle with a color (initialized before the call), based on the {@code highlight}
+     * parameter.
+     *
+     * @param x         the x-coordinate of the center of the vertex
+     * @param y         the y-coordinate of the center of the vertex
+     * @param text      the text to be displayed centered within the vertex
+     * @param highlight a boolean flag indicating whether the vertex should be
+     *                  highlighted (filled) or not
+     */
     private void drawVertex(double x, double y, String text, boolean highlight) {
         // Set font size
         int fontSize = 11;
@@ -301,26 +347,33 @@ public class BusNetworks {
         // Estimate text dimensions based on text length
         int estimatedTextWidth = text.length() * 6;
 
-        // Calculate coordinates for centering text within the rectangle
+        // Calculate coordinates
         double textX = x - ((double) estimatedTextWidth / 2);
-        double textY = y + ((double) fontSize / 2);
+        double textY = y + ((double) fontSize / 2) - ((double) 165 / fontSize); // prevent font overlapping the circle
 
         // Draw the centered text
-        UI.drawString(text, textX, textY - fontSize);
+        UI.drawString(text, textX, textY);
     }
 
     /**
-     * Recursively draws a line between two points.
+     * Recursively draws a line between two points (x1, y1) and (x2, y2) in segments,
+     * providing a visual effect of the line being drawn progressively.
+     * <p>
+     * The method utilizes the {@code calculateDistance} method to determine the
+     * Euclidean distance between the two points and draws small line segments
+     * from point (x2, y2) towards point (x1, y1) until the entire line is drawn.
+     * The drawing speed is controlled by the {@code segmentLength} and the delay
+     * introduced by {@code UI.sleep(1)}.
      *
-     * @param x1            The x-coordinate of the start point.
-     * @param y1            The y-coordinate of the start point.
-     * @param x2            The x-coordinate of the end point.
-     * @param y2            The y-coordinate of the end point.
-     * @param currentLength The current length of the line.
+     * @param x1            the x-coordinate of the starting point of the line
+     * @param y1            the y-coordinate of the starting point of the line
+     * @param x2            the x-coordinate of the ending point of the line
+     * @param y2            the y-coordinate of the ending point of the line
+     * @param currentLength the current length of the line. Initially, this should be 0.
      */
     private void drawLine(double x1, double y1, double x2, double y2, double currentLength) {
         // Calculate the Euclidian distance between two points. Used to ensure the line is fully drawn
-        double pointDistance = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        double pointDistance = calculateDistance(x1, y1, x2, y2);
 
         // Base case: Stop recursion when the line is fully drawn
         if (currentLength >= pointDistance) return;
@@ -328,7 +381,7 @@ public class BusNetworks {
         // Calculate the direction and length of the small segment to be drawn
         double dx = (x2 - x1) / pointDistance;
         double dy = (y2 - y1) / pointDistance;
-        double segmentLength = 5; // Drawing speed
+        double segmentLength = 2; // Drawing speed
 
         // Calculate the new start point of the segment
         double newStartX = x2 - dx * currentLength;
@@ -343,6 +396,57 @@ public class BusNetworks {
     }
 
     /**
+     * Retrieves a {@code Town} object based on the provided x and y coordinates.
+     * <p>
+     * This method iterates through all the towns in the {@code busNetwork} and calculates
+     * the distance from the provided coordinates to each town using the
+     * {@code calculateDistance} method. If the distance is less than or equal to
+     * the threshold, which is defined as an inverse relationship to the {@code circleSize},
+     * the town is returned. If no town is found within the threshold distance, {@code null} is returned.
+     * <p>
+     * The threshold is calculated as:
+     * <br>
+     * {@code threshold = scalingFactor / circleSize}
+     * <p>
+     * where {@code scalingFactor} is a constant that can be adjusted based on specific use cases
+     * to get the desired sensitivity for the threshold.
+     *
+     * @param x the x-coordinate to search for a town
+     * @param y the y-coordinate to search for a town
+     * @return the {@code Town} object found within the threshold distance, or
+     *         {@code null} if no town is found
+     */
+    private Town getTownByCoordinates(double x, double y) {
+        for (Town town : busNetwork.values()) {
+            double distance = calculateDistance(x, y, town.getX(), town.getY());
+            double scalingFactor = 100; // This value can be adjusted based on your specific use case
+
+            // Inverse relationship between circle size and threshold
+            double threshold = scalingFactor / circleSize;
+            if (distance <= threshold) return town;
+        }
+        return null; // Return null if no town is found within the threshold distance
+    }
+
+    /**
+     * Calculates the Euclidean distance between two points (x1, y1) and (x2, y2)
+     * in a 2D plane.
+     * <p>
+     * The distance is calculated using the formula:
+     * <br>
+     * {@code distance = sqrt((x2 - x1)^2 + (y2 - y1)^2)}
+     *
+     * @param x1 the x-coordinate of the first point
+     * @param y1 the y-coordinate of the first point
+     * @param x2 the x-coordinate of the second point
+     * @param y2 the y-coordinate of the second point
+     * @return the Euclidean distance between the two points
+     */
+    private double calculateDistance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    /**
      * Set up the GUI (buttons and mouse)
      */
     public void setupGUI() {
@@ -350,7 +454,7 @@ public class BusNetworks {
         UI.addButton("Print Network", this::printNetwork);
         UI.addTextField("Reachable from", this::printReachable);
         UI.addButton("All Connected Groups", this::printConnectedGroups);
-        UI.addButton("Draw Graph", this::displayGraph);
+        UI.addButton("Draw Graph", this::loadChallenge);
         UI.addButton("Clear", UI::clearPanes);
         UI.addButton("Quit", UI::quit);
         UI.setWindowSize(1280, 720);
