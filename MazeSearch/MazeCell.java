@@ -24,7 +24,7 @@ import java.awt.Color;
 public class MazeCell implements Iterable<MazeCell>{
     private final int col;
     private final int row;
-    private Set<MazeCell> neighbours;
+    private final Set<MazeCell> neighbours;
 
     private boolean visited = false;
 
@@ -34,7 +34,7 @@ public class MazeCell implements Iterable<MazeCell>{
     public MazeCell(int row, int col) {
         this.row = row;
         this.col = col;
-        neighbours = new HashSet<MazeCell>(4); 
+        neighbours = new HashSet<MazeCell>(4);
     }
 
     /**

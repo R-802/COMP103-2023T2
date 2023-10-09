@@ -48,10 +48,8 @@ public class MazeSearch {
         ms.makeMaze();
     }
 
-    //=================================================
-
     /**
-     * CORE
+     * Core:
      * Search for a path from a cell to the goal.
      * Return true if we got to the goal via this cell (and don't
      * search for any more paths).
@@ -90,7 +88,7 @@ public class MazeSearch {
     }
 
     /**
-     * COMPLETION
+     * Completion:
      * Search for all paths from a cell,
      * If we reach the goal, then we have found a complete path,
      * so pause for 1000 milliseconds
@@ -101,25 +99,24 @@ public class MazeSearch {
      */
     public void exploreFromCellAll(MazeCell cell) {
         if (stopNow) return; // Exit if user clicked the stop now button
-        // If cell is the goal cell
         if (cell == maze.getGoal()) {
             pathCount++; // We've found a new path, so increment path count
-            cell.draw(Color.blue); // Color blue before pausing
             UI.printMessage("Found " + pathCount + " paths!");
+            cell.draw(Color.blue); // Color the goal cell blue
             UI.sleep(1000); // Pause for 1 second
             cell.draw(Color.green); // Colour green after pause
         } else {
             UI.printMessage("Searching...");
             cell.visit();
             cell.draw(Color.yellow); // Color visited cell yellow
-            UI.sleep(delay); // Pause briefly
             for (MazeCell neighbors : cell) { // Traverse cells neighbors
                 if (!neighbors.isVisited()) {
                     exploreFromCellAll(neighbors);
                 }
             }
+            UI.sleep(delay); // Pause briefly
             cell.draw(Color.white); // Once cell is visited, colour cell white
-            cell.unvisit(); // Un visit so we can visit again
+            cell.unvisit(); // Unvisit so we can visit again
         }
     }
 
@@ -130,7 +127,6 @@ public class MazeSearch {
      * @param start The starting node
      */
     public void exploreFromCellShortest(MazeCell start) {
-        if (stopNow) return; // Exit if user clicked the stop now button
         Queue<ArrayList<MazeCell>> queue = new ArrayDeque<>(); // Queue for BFS
         ArrayList<MazeCell> startCell = new ArrayList<>();
         startCell.add(start);
@@ -143,8 +139,8 @@ public class MazeSearch {
                     cellStep.draw(Color.yellow);
                     UI.sleep(delay);
                 }
-                UI.printMessage("Found Shortest Path!");
                 currentCell.draw(Color.blue); // Color the goal blue
+                UI.printMessage("Found Shortest Path!");
                 return; // Terminate the method
             } else { // If not at the goal
                 UI.printMessage("Searching...");
