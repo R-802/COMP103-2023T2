@@ -68,7 +68,7 @@ public class MazeSearch {
      */
     public boolean exploreFromCell(MazeCell cell) {
         if (cell == maze.getGoal()) { // We've found the path
-            UI.printMessage("Found!");
+            UI.printMessage("Found Path");
             cell.draw(Color.blue);   // Indicate finding the goal
             return true; // Terminate method
         } else {
@@ -99,10 +99,13 @@ public class MazeSearch {
      * un visit the cell and colour it white.
      */
     public void exploreFromCellAll(MazeCell cell) {
-        if (stopNow) return; // Exit if user clicked the stop now button
+        if (stopNow) {
+            UI.printMessage("");
+            return;
+        } // Exit if user clicked the stop now button
         if (cell == maze.getGoal()) {
             pathCount++; // We've found a new path, so increment path count
-            UI.printMessage("Found " + pathCount + " paths!");
+            UI.printMessage("Found " + pathCount + " paths");
             cell.draw(Color.blue); // Color the goal cell blue
             UI.sleep(1000); // Pause for 1 second
             cell.draw(Color.green); // Colour green after pause
@@ -141,7 +144,7 @@ public class MazeSearch {
                     UI.sleep(delay);
                 }
                 currentCell.draw(Color.blue); // Color the goal blue
-                UI.printMessage("Found Shortest Path!");
+                UI.printMessage("Shortest path has " + cells.size() + " steps");
                 return; // Terminate the method
             } else { // If not at the goal
                 UI.printMessage("Searching...");

@@ -195,7 +195,6 @@ public class BusNetworks {
             UI.println(townName + " is not a recognized town!");
         } else {
             printWithDivider("From " + startingTown.getName() + " you can get to:");
-
             for (Town neighborTown : findAllConnected(startingTown)) {
                 // Ensure the starting town itself is not printed
                 if (!neighborTown.getName().equals(townName)) {
@@ -251,7 +250,6 @@ public class BusNetworks {
             // Read file and retrieve the number of towns
             List<String> lines = Files.readAllLines(Path.of("BusNetworks\\data-with-lat-long.txt"));
             int numberOfTowns = Integer.parseInt(lines.remove(0).trim()); // Retrieve and remove number of towns
-
 
             for (int i = 0; i < numberOfTowns; i++) {
                 String[] townData = lines.remove(0).split("\\s+");
@@ -396,7 +394,7 @@ public class BusNetworks {
         double newStartX = x2 - dx * currentLength;
         double newStartY = y2 - dy * currentLength;
 
-        UI.setLineWidth(2); // Draw the small line segment
+        UI.setLineWidth(1); // Draw the small line segment
         UI.drawLine(newStartX, newStartY, x2, y2);
         UI.sleep(segmentLength); // Delay for visualization
 
