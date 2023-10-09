@@ -267,7 +267,7 @@ public class BusNetworks {
             displayVertices(); // Display all vertices on the UI
             UI.println("Loaded " + numberOfTowns + " towns!");
             UI.drawString("Click to draw connected towns", 2, 12);
-            UI.setMouseListener(this::doMouse); // Set mouse listener
+            UI.setMouseListener(this::doMouse); // Did not call in setupGUI as we're not using it for other methods
         } catch (Exception e) {
             throw new RuntimeException("Loading data-with-lat-long.txt failed", e);
         }
@@ -470,7 +470,7 @@ public class BusNetworks {
     }
 
     /**
-     * Set up the GUI (buttons and mouse)
+     * Set up the GUI
      */
     public void setupGUI() {
         UI.addButton("Load", () -> loadNetwork(UIFileChooser.open()));
