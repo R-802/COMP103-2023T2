@@ -38,7 +38,8 @@ public class MazeSearch {
     private String search = "first";   // "first", "all", or "shortest"
     private int pathCount = 0;
     private boolean stopNow = false;
-    // fields for gui.
+
+    // Fields for gui.
     private int delay = 20;
     private int size = 10;
 

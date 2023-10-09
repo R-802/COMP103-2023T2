@@ -52,14 +52,13 @@ public class BusNetworks {
             UI.clearText();
             busNetwork.clear();
 
+            // Read file and get town names from first line of file
             List<String> lines = Files.readAllLines(Path.of(filename));
             String firstLine = lines.remove(0);
             String[] townNames = firstLine.split("\\s+");
 
             // Add all towns to the busNetwork field
-            for (String town : townNames) {
-                busNetwork.put(town, new Town(town));
-            }
+            for (String town : townNames) busNetwork.put(town, new Town(town));
             constructGraph(lines); // Construct the graph
             UI.println("Loaded " + busNetwork.size() + " towns!");
         } catch (IOException e) {
@@ -104,9 +103,7 @@ public class BusNetworks {
      */
     public void printNetwork() {
         UI.clearText();
-        String s = "The current network:";
-        UI.println(s);
-        animateDivider(s.length());
+        printWithDivider("The current network:");
 
         // Iterate through the entry set to avoid multiple lookups for each town
         for (Map.Entry<String, Town> entry : busNetwork.entrySet()) {
@@ -197,9 +194,7 @@ public class BusNetworks {
         if (startingTown == null) {
             UI.println(townName + " is not a recognized town!");
         } else {
-            String s = "From " + startingTown.getName() + " you can get to:";
-            UI.println(s);
-            animateDivider(s.length());
+            printWithDivider("From " + startingTown.getName() + " you can get to:");
 
             for (Town neighborTown : findAllConnected(startingTown)) {
                 // Ensure the starting town itself is not printed
@@ -217,9 +212,7 @@ public class BusNetworks {
      */
     public void printConnectedGroups() {
         UI.clearText();
-        String s = "Groups of Connected Towns:";
-        UI.println(s);
-        animateDivider(s.length());
+        printWithDivider("Groups of Connected Towns:");
         Set<Town> unvisitedTowns = new HashSet<>(busNetwork.values());
         int groupCounter = 1;
 
@@ -248,18 +241,20 @@ public class BusNetworks {
      */
     public void loadChallenge() {
         try {
-            UI.clearGraphics();
-            UI.clearText();
+            UI.clearPanes();
             busNetwork.clear();
 
-            List<String> lines = Files.readAllLines(Path.of("BusNetworks\\data-with-lat-long.txt"));
-            int numberOfTowns = Integer.parseInt(lines.remove(0).trim()); // Retrieve and remove number of towns
-
+            // Constants
             double latitudeOffset = 35, longitudeOffset = -165;
             int magnification = 55;
 
+            // Read file and retrieve the number of towns
+            List<String> lines = Files.readAllLines(Path.of("BusNetworks\\data-with-lat-long.txt"));
+            int numberOfTowns = Integer.parseInt(lines.remove(0).trim()); // Retrieve and remove number of towns
+
+
             for (int i = 0; i < numberOfTowns; i++) {
-                String[] townData = lines.remove(0).split(" ");
+                String[] townData = lines.remove(0).split("\\s+");
                 String townName = townData[0];
                 double latitude = Double.parseDouble(townData[1]);
                 double longitude = Double.parseDouble(townData[2]);
@@ -276,7 +271,7 @@ public class BusNetworks {
             UI.drawString("Click to draw connected towns", 2, 12);
             UI.setMouseListener(this::doMouse); // Set mouse listener
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load data!", e);
+            throw new RuntimeException("Loading data-with-lat-long.txt failed", e);
         }
     }
 
@@ -310,7 +305,7 @@ public class BusNetworks {
                 displayVertices(); // Clears the graphics window and redraws all vertices
                 UI.drawString("Click to draw connected towns", 2, 12); // Redisplay the message
 
-                // Draw the towns neighbors with its connections and black filled circles
+                // Draw the towns neighbors and its connections
                 for (Town neighbour : clickedTown.getNeighbours()) {
                     drawLine(clickedTown.getX(), clickedTown.getY(), neighbour.getX(), neighbour.getY(), 0);
                     drawVertex(neighbour.getX(), neighbour.getY(), neighbour.getName(), true);
@@ -322,13 +317,11 @@ public class BusNetworks {
                 UI.setColor(Color.black); // Reset color to black
 
                 // Get name of the town and its set of neighbors
-                String townName = (clickedTown.getName());
+                String townName = clickedTown.getName();
                 String neighborNames = getTownName(clickedTown.getNeighbours());
 
                 // Print each town and its set of neighbors
-                String s = townName + " Connections:";
-                UI.println(s);
-                animateDivider(s.length());
+                printWithDivider(townName + " Connections:");
                 UI.println(townName + " -> " + neighborNames);
             }
         }
@@ -467,10 +460,11 @@ public class BusNetworks {
     /**
      * Prints a divider of the specified length to the UI. Very useless method, but I like it.
      *
-     * @param textLength length of the divider/upper text
+     * @param s input text
      */
-    private void animateDivider(int textLength) {
-        for (int i = 0; i < textLength; i++) {
+    private void printWithDivider(String s) {
+        UI.println(s);
+        for (int i = 0; i < s.length(); i++) {
             UI.print("=");
             UI.sleep((double) animationSpeed / 2); // Ensure the animation is faster than the text
         }
