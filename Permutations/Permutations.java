@@ -66,7 +66,8 @@ public class Permutations {
     public void extendPermutation(Set<String> remainingItems, Stack<String> permutationSoFar, List<List<String>> allPermutations) {
         if (remainingItems.isEmpty()) { // Base case
             if (allPermutations.size() <= 10000) // Only add the first 10000 permutations to the allPermutations list
-            {
+            {   // Create a copy of the permutation so far
+                List<String> permutationCopy = new ArrayList<>(permutationSoFar);
                 allPermutations.add(permutationCopy); // Add a copy of the permutation to allPermutations
             }
             counter++;
