@@ -144,7 +144,7 @@ public class MazeSearch {
                     UI.sleep(delay);
                 }
                 currentCell.draw(Color.blue); // Color the goal blue
-                UI.printMessage("Shortest path has " + cells.size() + " steps");
+                UI.printMessage("Shortest path has " + (cells.size() - 1) + " steps");
                 return; // Terminate the method
             } else { // If not at the goal
                 UI.printMessage("Searching...");
