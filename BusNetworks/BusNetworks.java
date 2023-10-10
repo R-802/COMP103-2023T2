@@ -52,14 +52,13 @@ public class BusNetworks {
             UI.clearText();
             busNetwork.clear();
 
+            // Read file and get town names from first line of file
             List<String> lines = Files.readAllLines(Path.of(filename));
             String firstLine = lines.remove(0);
             String[] townNames = firstLine.split("\\s+");
 
             // Add all towns to the busNetwork field
-            for (String town : townNames) {
-                busNetwork.put(town, new Town(town));
-            }
+            for (String town : townNames) busNetwork.put(town, new Town(town));
             constructGraph(lines); // Construct the graph
             UI.println("Loaded " + busNetwork.size() + " towns!");
         } catch (IOException e) {
@@ -104,9 +103,7 @@ public class BusNetworks {
      */
     public void printNetwork() {
         UI.clearText();
-        String s = "The current network:";
-        UI.println(s);
-        animateDivider(s.length());
+        printWithDivider("The current network:");
 
         // Iterate through the entry set to avoid multiple lookups for each town
         for (Map.Entry<String, Town> entry : busNetwork.entrySet()) {
@@ -172,9 +169,7 @@ public class BusNetworks {
      * @param visitedTowns Used to keep track of the towns we've visited
      */
     private void _findAllConnected(Town currentTown, Set<Town> visitedTowns) {
-        // Add the current town to the visited set.
         visitedTowns.add(currentTown);
-        // Use a for-each loop to iterate through all neighbor towns.
         for (Town neighborTown : currentTown.getNeighbours()) {
             // Check if the neighbor town has been visited before.
             if (!visitedTowns.contains(neighborTown)) {
@@ -197,10 +192,7 @@ public class BusNetworks {
         if (startingTown == null) {
             UI.println(townName + " is not a recognized town!");
         } else {
-            String s = "From " + startingTown.getName() + " you can get to:";
-            UI.println(s);
-            animateDivider(s.length());
-
+            printWithDivider("From " + startingTown.getName() + " you can get to:");
             for (Town neighborTown : findAllConnected(startingTown)) {
                 // Ensure the starting town itself is not printed
                 if (!neighborTown.getName().equals(townName)) {
@@ -217,9 +209,7 @@ public class BusNetworks {
      */
     public void printConnectedGroups() {
         UI.clearText();
-        String s = "Groups of Connected Towns:";
-        UI.println(s);
-        animateDivider(s.length());
+        printWithDivider("Groups of Connected Towns:");
         Set<Town> unvisitedTowns = new HashSet<>(busNetwork.values());
         int groupCounter = 1;
 
@@ -243,23 +233,39 @@ public class BusNetworks {
     //======================//
 
     /**
-     * Displays the graph of towns and their connections, based on data read from data-with-lat-long.txt
-     * Towns are displayed as circles and connections as lines between them.
+     * Loads a network of towns from a specified file, constructs a graph, and displays the vertices on the UI.
+     * <p>
+     * The method expects a file with the following format:
+     * <ul>
+     *     <li>The first line contains the total number of towns.</li>
+     *     <li>Subsequent lines contain the name, latitude, and longitude of each town, separated by whitespace.</li>
+     *     <li>After the town data, lines contain pairs of town names that are connected, separated by whitespace.</li>
+     * </ul>
+     * The method performs the following operations:
+     * <ul>
+     *     <li>Clears the UI panes and the {@code busNetwork} map.</li>
+     *     <li>Reads the town data from the file and adds {@code Town} objects to the {@code busNetwork}.</li>
+     *     <li>Constructs the graph of towns and their connections.</li>
+     *     <li>Displays the vertices (towns) on the UI.</li>
+     *     <li>Prints a message to the UI indicating the number of towns loaded.</li>
+     *     <li>Displays a message on the UI instructing the user to click to draw connected towns.</li>
+     *     <li>Sets a mouse listener to handle user clicks.</li>
+     * </ul>
+     *
+     * @throws RuntimeException if loading the file fails, with the cause being the original exception
      */
     public void loadChallenge() {
         try {
-            UI.clearGraphics();
-            UI.clearText();
+            UI.clearPanes();
             busNetwork.clear();
-
-            List<String> lines = Files.readAllLines(Path.of("BusNetworks\\data-with-lat-long.txt"));
-            int numberOfTowns = Integer.parseInt(lines.remove(0).trim()); // Retrieve and remove number of towns
-
             double latitudeOffset = 35, longitudeOffset = -165;
             int magnification = 55;
 
+            // Read file and retrieve the number of towns
+            List<String> lines = Files.readAllLines(Path.of("BusNetworks\\data-with-lat-long.txt"));
+            int numberOfTowns = Integer.parseInt(lines.remove(0).trim()); // Retrieve and remove number of towns
             for (int i = 0; i < numberOfTowns; i++) {
-                String[] townData = lines.remove(0).split(" ");
+                String[] townData = lines.remove(0).split("\\s+");
                 String townName = townData[0];
                 double latitude = Double.parseDouble(townData[1]);
                 double longitude = Double.parseDouble(townData[2]);
@@ -274,16 +280,16 @@ public class BusNetworks {
             displayVertices(); // Display all vertices on the UI
             UI.println("Loaded " + numberOfTowns + " towns!");
             UI.drawString("Click to draw connected towns", 2, 12);
-            UI.setMouseListener(this::doMouse); // Set mouse listener
+            UI.setMouseListener(this::doMouse); // Did not call in setupGUI as we're not using it for other methods
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load data!", e);
+            throw new RuntimeException("Loading data-with-lat-long.txt failed", e);
         }
     }
 
     /**
      * Displays all vertices (towns) on the UI by drawing them on the graphics window.
      * <p>
-     * This method iterates through all the {@code Town} objects in the {@code busNetwork}
+     * The method iterates through all the {@code Town} objects in the {@code busNetwork}
      * and utilizes the {@code drawVertex} method to draw each vertex on the UI. The
      * vertices are drawn at their respective (x, y) coordinates and display the town's
      * name. The graphics window and text are cleared at the start to ensure a clean slate
@@ -297,7 +303,18 @@ public class BusNetworks {
     }
 
     /**
-     * Handles mouse events on the UI. On press, the method draws the clicked town's.
+     * Handles mouse events on the UI.
+     * The method uses {@code getTownByCoordinates} to retrieve the town at the
+     * selected (x, y) position.
+     * <p>
+     * The method also performs the following operations:
+     * <ul>
+     *     <li>Retrieves the selected towns.</li>
+     *     <li>Calls {@code drawVertices} to clear panes and redraw vertices.</li>
+     *     <li>Displays the selected towns neighbors and its connections.</li>
+     *     <li>Highlights the selected town vertex green.</li>
+     *     <li>Prints the selected town and its connected neighbors.</li>
+     * </ul>
      *
      * @param action Mouse action
      * @param x      Mouse x coordinate
@@ -307,10 +324,10 @@ public class BusNetworks {
         if (action.equals("pressed")) {
             Town clickedTown = getTownByCoordinates(x, y);
             if (clickedTown != null) {
-                displayVertices(); // Clears the graphics window and redraws all vertices
+                displayVertices(); // Clears the graphics and text window and redraws all vertices
                 UI.drawString("Click to draw connected towns", 2, 12); // Redisplay the message
 
-                // Draw the towns neighbors with its connections and black filled circles
+                // Draw the towns neighbors and its connections
                 for (Town neighbour : clickedTown.getNeighbours()) {
                     drawLine(clickedTown.getX(), clickedTown.getY(), neighbour.getX(), neighbour.getY(), 0);
                     drawVertex(neighbour.getX(), neighbour.getY(), neighbour.getName(), true);
@@ -322,13 +339,11 @@ public class BusNetworks {
                 UI.setColor(Color.black); // Reset color to black
 
                 // Get name of the town and its set of neighbors
-                String townName = (clickedTown.getName());
+                String townName = clickedTown.getName();
                 String neighborNames = getTownName(clickedTown.getNeighbours());
 
                 // Print each town and its set of neighbors
-                String s = townName + " Connections:";
-                UI.println(s);
-                animateDivider(s.length());
+                printWithDivider(townName + " Connections:");
                 UI.println(townName + " -> " + neighborNames);
             }
         }
@@ -349,11 +364,8 @@ public class BusNetworks {
      *                  highlighted (filled) or not
      */
     private void drawVertex(double x, double y, String text, boolean highlight) {
-        // Set font size
         int fontSize = 11;
         UI.setFontSize(fontSize);
-
-        // Draw vertex
         if (highlight) {
             UI.fillOval(x - ((double) circleSize / 2), y - ((double) circleSize / 2), circleSize, circleSize);
         } else {
@@ -366,8 +378,6 @@ public class BusNetworks {
         // Calculate coordinates
         double textX = x - ((double) estimatedTextWidth / 2);
         double textY = y + ((double) fontSize / 2) - ((double) 165 / fontSize); // prevent font overlapping the circle
-
-        // Draw the centered text
         UI.drawString(text, textX, textY);
     }
 
@@ -388,11 +398,9 @@ public class BusNetworks {
      * @param currentLength the current length of the line. Initially, this should be 0.
      */
     private void drawLine(double x1, double y1, double x2, double y2, double currentLength) {
-        // Calculate the Euclidean distance between two points. Used to ensure the line is fully drawn
+        // Calculate point distance. Used to ensure the line is fully drawn
         double pointDistance = calculateDistance(x1, y1, x2, y2);
-
-        // Base case: Stop recursion when the line is fully drawn
-        if (currentLength >= pointDistance) return;
+        if (currentLength >= pointDistance) return; // Stop when the line is fully drawn
 
         // Calculate the direction and length of the small segment to be drawn
         double dx = (x2 - x1) / pointDistance;
@@ -402,8 +410,7 @@ public class BusNetworks {
         // Calculate the new start point of the segment
         double newStartX = x2 - dx * currentLength;
         double newStartY = y2 - dy * currentLength;
-
-        UI.setLineWidth(2); // Draw the small line segment
+        UI.setLineWidth(1); // Draw the small line segment
         UI.drawLine(newStartX, newStartY, x2, y2);
         UI.sleep(segmentLength); // Delay for visualization
 
@@ -461,16 +468,18 @@ public class BusNetworks {
      * @return the Euclidean distance between the two points
      */
     private double calculateDistance(double x1, double y1, double x2, double y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     /**
-     * Prints a divider of the specified length to the UI. Very useless method, but I like it.
+     * Iteratively prints a divider under an input string.
+     * Very useless method, but I like it.
      *
-     * @param textLength length of the divider/upper text
+     * @param s input text
      */
-    private void animateDivider(int textLength) {
-        for (int i = 0; i < textLength; i++) {
+    private void printWithDivider(String s) {
+        UI.println(s);
+        for (int i = 0; i < s.length(); i++) {
             UI.print("=");
             UI.sleep((double) animationSpeed / 2); // Ensure the animation is faster than the text
         }
@@ -478,7 +487,7 @@ public class BusNetworks {
     }
 
     /**
-     * Set up the GUI (buttons and mouse)
+     * Set up the GUI
      */
     public void setupGUI() {
         UI.addButton("Load", () -> loadNetwork(UIFileChooser.open()));
